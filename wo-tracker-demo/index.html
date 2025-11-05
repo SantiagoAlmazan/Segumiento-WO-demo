@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard General - WO Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>📊 Dashboard General</h1>
+  <nav>
+    <a href="cnc.html">CNC</a>
+    <a href="molino.html">Molino</a>
+    <a href="ensamble.html">Ensamble</a>
+    <a href="lija.html">Lija</a>
+    <a href="pintura.html">Pintura</a>
+    <a href="master.html">Master</a>
+  </nav>
+
+  <table id="woTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Descripción</th>
+        <th>Cliente</th>
+        <th>Estación actual</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script src="script.js"></script>
+  <script>
+    renderTable();
+  </script>
+</body>
+</html>
