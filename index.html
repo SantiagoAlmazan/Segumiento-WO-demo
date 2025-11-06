@@ -8,13 +8,13 @@
 </head>
 <body>
   <nav>
-    <a href="./index.html">Dashboard</a> |
-    <a href="./master.html">Master</a>
-    <a href="./cnc.html">CNC</a> |
-    <a href="./molino.html">Molino</a> |
-    <a href="./ensamble.html">Ensamble</a> |
-    <a href="./lija.html">Lija</a> |
-    <a href="./pintura.html">Pintura</a>
+    <a href="index.html">Dashboard</a> |
+    <a href="master.html">Panel Master</a> |
+    <a href="cnc.html">CNC</a> |
+    <a href="molino.html">Molino</a> |
+    <a href="lija.html">Lija</a> |
+    <a href="ensamble.html">Ensamble</a> |
+    <a href="pintura.html">Pintura</a>
   </nav>
 
   <h1>Dashboard General</h1>
@@ -28,7 +28,8 @@
         <th>Descripción</th>
         <th>Piezas</th>
         <th>Clasificación</th>
-        <th>Estación actual</th>
+        <th>Estado / Estación</th>
+        <th>Acción</th>
       </tr>
     </thead>
     <tbody id="tabla-dashboard"></tbody>
@@ -36,11 +37,38 @@
 
   <script src="script.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", actualizarTablaDashboard);
+    document.addEventListener("DOMContentLoaded", actualizarDashboard);
+
+    function actualizarDashboard() {
+      const allWOs = JSON.parse(localStorage.getItem("workOrders")) || [];
+      const tbody = document.getElementById("tabla-dashboard");
+      tbody.innerHTML = "";
+
+      allWOs.forEach(wo => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${wo.id}</td>
+          <td>${wo.descripcion}</td>
+          <td>${wo.piezas}</td>
+          <td>${wo.clasificacion}</td>
+          <td>${wo.estado}</td>
+          <td><button class="btn-ver" onclick="window.location.href='wo_detail.html?id=${wo.id}'">Ver Detalles</button></td>
+
+
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function verDetalle(id) {
+      localStorage.setItem("detalleWO", id);
+      window.location.href = "wo_detail.html";
+    }
 
     function filtrarWO() {
       const filtro = document.getElementById("buscador").value.toLowerCase();
-      const filas = document.querySelectorAll("#tablaDashboard tbody tr");
+      const filas = document.querySelectorAll("#tabla-dashboard tbody tr");
       filas.forEach(fila => {
         const texto = fila.textContent.toLowerCase();
         fila.style.display = texto.includes(filtro) ? "" : "none";
@@ -49,6 +77,5 @@
   </script>
 </body>
 </html>
-
 
 
