@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard General</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav>
+    <a href="index.html">Dashboard</a> |
+    <a href="master.html">Panel Master</a> |
+    <a href="cnc.html">CNC</a> |
+    <a href="molino.html">Molino</a> |
+    <a href="ensamble.html">Ensamble</a> |
+    <a href="lija.html">Lija</a> |
+    <a href="pintura.html">Pintura</a>
+  </nav>
+
+  <h1>Dashboard General</h1>
+
+  <input type="text" id="buscador" placeholder="Buscar WO..." onkeyup="filtrarWO()">
+
+  <table id="tablaDashboard">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Descripción</th>
+        <th>Piezas</th>
+        <th>Clasificación</th>
+        <th>Estación actual</th>
+      </tr>
+    </thead>
+    <tbody id="tabla-dashboard"></tbody>
+  </table>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", actualizarTablaDashboard);
+
+    function filtrarWO() {
+      const filtro = document.getElementById("buscador").value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaDashboard tbody tr");
+      filas.forEach(fila => {
+        const texto = fila.textContent.toLowerCase();
+        fila.style.display = texto.includes(filtro) ? "" : "none";
+      });
+    }
+  </script>
+</body>
+</html>
