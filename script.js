@@ -132,5 +132,21 @@ function actualizarTablaDashboard() {
   });
 }
 
+function agregarWO(descripcion, piezas, clasificacion) {
+  const allWOs = JSON.parse(localStorage.getItem("workOrders")) || [];
+  const nuevaWO = {
+    id: Date.now().toString(),
+    descripcion,
+    piezas,
+    clasificacion,
+    estado: "En espera"
+  };
+  allWOs.push(nuevaWO);
+  localStorage.setItem("workOrders", JSON.stringify(allWOs));
+  actualizarTablas(); // o la función que refresca tus tablas
+}
+
+
+
 document.addEventListener("DOMContentLoaded", actualizarTablas);
 
