@@ -1,111 +1,80 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Master - Control de Producción</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <nav>
-    <a href="index.html">🏠 Dashboard</a>
-    <a href="cnc.html">CNC</a>
-    <a href="molino.html">Molino</a>
-    <a href="ensamble.html">Ensamble</a>
-    <a href="lija.html">Lija</a>
-    <a href="pintura.html">Pintura</a>
-  </nav>
+function cargarWO() {
+  return JSON.parse(localStorage.getItem("woData") || "[]");
+}
 
-  <h1>📋 Panel Master</h1>
+function guardarWO(data) {
+  localStorage.setItem("woData", JSON.stringify(data));
+}
 
-  <!-- Sección para crear nuevas WO -->
-  <section class="crear-wo">
-    <h2>Crear nueva Work Order (WO)</h2>
-    <div class="form-crear">
-      <input type="text" id="wo-id" placeholder="ID de WO">
-      <input type="text" id="wo-desc" placeholder="Descripción">
-      <input type="number" id="wo-piezas" placeholder="Cantidad de piezas">
-      <input type="text" id="wo-clasif" placeholder="Clasificación">
-      <button onclick="crearWO(
-        document.getElementById('wo-id').value,
-        document.getElementById('wo-desc').value,
-        document.getElementById('wo-piezas').value,
-        document.getElementById('wo-clasif').value
-      )">➕ Agregar WO</button>
-    </div>
-  </section>
+function actualizarResumen() {
+  const data = cargarWO();
+  const total = data.length;
+  const enEspera = data.filter(w => w.estacion === "En espera").length;
+  const finalizadas = data.filter(w => w.estacion === "Finalizada").length;
+  const enProceso = total - enEspera - finalizadas;
 
-  <!-- Tabla de TODAS las WO activas -->
-  <section class="tabla-master">
-    <h2>Órdenes activas</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Descripción</th>
-          <th>Piezas</th>
-          <th>Clasificación</th>
-          <th>Estación actual</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody id="tabla-master"></tbody>
-    </table>
-  </section>
+  document.getElementById("total-wo").textContent = total;
+  document.getElementById("en-espera").textContent = enEspera;
+  document.getElementById("en-proceso").textContent = enProceso;
+  document.getElementById("finalizadas").textContent = finalizadas;
+}
 
-  <script src="script.js"></script>
-  <script>
-    function actualizarTablaMaster() {
-      const allWOs = JSON.parse(localStorage.getItem("workOrders")) || [];
-      const tbody = document.getElementById("tabla-master");
-      tbody.innerHTML = "";
+function renderizarTabla() {
+  const data = cargarWO();
+  const tbody = document.querySelector("#woTable tbody");
 
-      allWOs.forEach(wo => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${wo.id}</td>
-          <td>${wo.descripcion}</td>
-          <td>${wo.piezas}</td>
-          <td>${wo.clasificacion}</td>
-          <td>${wo.estado}</td>
-          <td>
-            <select onchange="moverWO('${wo.id}', this.value)">
-              <option value="">Mover a...</option>
-              <option value="En espera">En espera</option>
-              <option value="CNC">CNC</option>
-              <option value="Molino">Molino</option>
-              <option value="Ensamble">Ensamble</option>
-              <option value="Lija">Lija</option>
-              <option value="Pintura">Pintura</option>
-            </select>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
+  tbody.innerHTML = data.map((w, i) => `
+    <tr>
+      <td>${w.id}</td>
+      <td>${w.desc}</td>
+      <td>${w.estacion}</td>
+      <td>
+        ${w.estacion === "En espera" ? 
+          `<button onclick="asignarEstacion(${i})">Asignar</button>` : 
+          `<button onclick="revertirAWO(${i})">Volver a espera</button>`}
+      </td>
+    </tr>
+  `).join("");
 
-    function moverWO(id, nuevaEstacion) {
-      if (!nuevaEstacion) return;
+  actualizarResumen();
+}
 
-      const clave = prompt("Ingrese la contraseña del encargado:");
-      if (clave !== "123") {
-        alert("❌ Contraseña incorrecta");
-        actualizarTablaMaster();
-        return;
-      }
+function agregarWO() {
+  const id = prompt("Ingrese ID de la WO:");
+  if (!id) return;
+  const desc = prompt("Ingrese descripción:");
+  const data = cargarWO();
+  data.push({ id, desc, estacion: "CNC" });
+  guardarWO(data);
+  renderizarTabla();
+}
 
-      const allWOs = JSON.parse(localStorage.getItem("workOrders")) || [];
-      const wo = allWOs.find(w => w.id === id);
-      if (wo) {
-        wo.estado = nuevaEstacion;
-        localStorage.setItem("workOrders", JSON.stringify(allWOs));
-        alert(`✅ La WO ${id} ha sido movida a ${nuevaEstacion}`);
-        actualizarTablaMaster();
-      }
-    }
+function asignarEstacion(index) {
+  const estaciones = ["CNC", "Molino", "Ensamble", "Lija", "Pintura"];
+  const estacion = prompt(`Asignar a estación (${estaciones.join(", ")}):`);
+  if (!estacion || !estaciones.includes(estacion)) {
+    alert("Estación no válida.");
+    return;
+  }
+  const data = cargarWO();
+  data[index].estacion = estacion;
+  guardarWO(data);
+  renderizarTabla();
+}
 
-    document.addEventListener("DOMContentLoaded", actualizarTablaMaster);
-  </script>
+function revertirAWO(index) {
+  const data = cargarWO();
+  data[index].estacion = "En espera";
+  guardarWO(data);
+  renderizarTabla();
+}
+const nuevaWO = {
+  id,
+  descripcion,
+  piezas,
+  clasificacion,
+  estado: "En espera", // estación inicial
+  historial: [{ estacion: "En espera", fecha: new Date().toLocaleString() }]
+};
 
- </body>
-</html>
+document.addEventListener("DOMContentLoaded", renderizarTabla);
